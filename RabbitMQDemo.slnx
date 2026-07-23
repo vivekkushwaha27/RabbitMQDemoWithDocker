@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ConsumerWorker/ConsumerWorker.csproj" />
+  <Project Path="ProducerApi/ProducerApi.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+</Solution>
