@@ -1,0 +1,60 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq-demo
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  producerapi:
+    build:
+      context: .
+      dockerfile: ProducerApi/Dockerfile
+
+    container_name: producer-api
+
+    ports:
+      - "5100:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__UserName: guest
+      RabbitMQ__Password: guest
+      RabbitMQ__QueueName: demo-queue
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  consumerworker:
+    build:
+      context: .
+      dockerfile: ConsumerWorker/Dockerfile
+
+    container_name: consumer-worker
+
+    environment:
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__UserName: guest
+      RabbitMQ__Password: guest
+      RabbitMQ__QueueName: demo-queue
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
